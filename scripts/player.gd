@@ -26,6 +26,12 @@ var status: PlayerState # Recebe os valores do Enum
 # Controla a direção
 var direction = 0
 
+# Contagem de pulos
+var jump_count = 0
+
+# Limite de pulos
+@export var max_jump_count = 2
+
 # Começa no estado idle
 func _ready() -> void:
 	go_to_idle_state()
@@ -66,6 +72,7 @@ func go_to_jump_state():
 	status = PlayerState.jump # Define o status como jump
 	animated_sprite_2d.play("jump") # Animação de pular
 	velocity.y = jump_velocity
+	jump_count += 1 # incrementa a contagem de pulos
 
 func go_to_duck_state():
 	status = PlayerState.duck # Define o status como duck
@@ -112,8 +119,14 @@ func walk_state(delta: float):
 # Estado de pular
 func jump_state(delta: float):
 	move(delta) # Chama a função move
+	
+	# Pulo duplo
+	if Input.is_action_just_pressed("jump") && jump_count < max_jump_count:
+		go_to_jump_state()
+		
 	# Ao voltar ao chão, vai para o estado idle ou walk
 	if is_on_floor(): # Se estiver no chão:
+		jump_count = 0 # Zera a contagem de pulos
 		if velocity.x == 0: 
 			go_to_idle_state() # Se estiver parado, vai para o estado de idle
 		else:
