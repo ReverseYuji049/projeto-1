@@ -4,11 +4,15 @@ extends CharacterBody2D # Importa o Player
 enum PlayerState {
 	idle,
 	walk,
-	jump
+	jump,
+	duck
 }
 
 # Define uma variável atribuída a animação do Player
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
+
+# Define uma variável atribuída ao colisor do Player
+@onready var collison_shape_2d: CollisionShape2D = $CollisionShape2D
 
 # Variáveis do Player para a velocidade, pulo, gravidade
 @export var speed: float = 80.0
@@ -18,6 +22,9 @@ enum PlayerState {
 @export var gravity: float = 980.0
 
 var status: PlayerState # Recebe os valores do Enum
+
+# Controla a direção
+var direction = 0
 
 # Começa no estado idle
 func _ready() -> void:
@@ -41,7 +48,8 @@ func _physics_process(delta: float) -> void:
 			walk_state(delta) # Chama a função walk
 		PlayerState.jump:
 			jump_state(delta) # Chama a função jump
-	
+		PlayerState.duck:
+			duck_state() # Chama a função duck 
 	# Movimentação final	
 	move_and_slide()   
 	
@@ -59,6 +67,19 @@ func go_to_jump_state():
 	animated_sprite_2d.play("jump") # Animação de pular
 	velocity.y = jump_velocity
 
+func go_to_duck_state():
+	status = PlayerState.duck # Define o status como duck
+	animated_sprite_2d.play("duck") # Animação de agachar
+	collison_shape_2d.shape.size.x = 16.0
+	collison_shape_2d.shape.size.y = 14.0
+	collison_shape_2d.position.y = 1.2
+
+# Sai do estado de duck
+func exit_from_duck_state():
+	collison_shape_2d.shape.size.x = 14.0
+	collison_shape_2d.shape.size.y = 20.0
+	collison_shape_2d.position.y = -2.0
+
 # Roda infinitamente
 func idle_state(delta: float):
 	move(delta) # Chama a função move
@@ -70,7 +91,12 @@ func idle_state(delta: float):
 	if Input.is_action_just_pressed("jump"): 
 		go_to_jump_state() # Chama a função de pular uma vez
 		return
+	# Se a tecla específica está pressionada, vai para o estado duck (apenas uma vez)
+	if Input.is_action_pressed("duck"):
+		go_to_duck_state()
+		return
 
+# Estado de andar
 func walk_state(delta: float):
 	move(delta)
 	# Se está parado, vai para o estado idle
@@ -94,11 +120,27 @@ func jump_state(delta: float):
 			go_to_walk_state() # Senão, vai para o estado de andar
 		return
 
+# Estado de agachar
+func duck_state():
+	# Chama a função de atualizar direção
+	update_direction()
+	# Se a tecla não estiver pressionada
+	if Input.is_action_just_released("duck"):
+		exit_from_duck_state() # Sai do estado de agachar
+		go_to_idle_state() # Volta ao estado de idle
+		return
 # Movimentação do Player
 func move(delta: float):
-	# Define a direção do Player (esquerda e direita)
-	var direction := Input.get_axis("left", "right") 
 	
+	# Chama a função de atualizar a direção
+	update_direction()
+	
+	# Verificação da direção
+	if direction < 0:
+		animated_sprite_2d.flip_h = true # direita
+	elif direction > 0:
+		animated_sprite_2d.flip_h = false # esquerda
+		
 	# Se direção:
 	if direction:
 		# Anda para frente
@@ -113,6 +155,11 @@ func move(delta: float):
 			0,
 			friction * delta
 		)
+
+func update_direction():
+	# Define a direção do Player (esquerda e direita)
+	direction = Input.get_axis("left", "right") 
+	
 	# Verificação da direção
 	if direction < 0:
 		animated_sprite_2d.flip_h = true # direita
