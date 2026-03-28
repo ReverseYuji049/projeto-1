@@ -5,6 +5,7 @@ enum PlayerState {
 	idle,
 	walk,
 	jump,
+	fall,
 	duck
 }
 
@@ -54,6 +55,8 @@ func _physics_process(delta: float) -> void:
 			walk_state(delta) # Chama a função walk
 		PlayerState.jump:
 			jump_state(delta) # Chama a função jump
+		PlayerState.fall:
+			fall_state(delta) # Chama a função fall
 		PlayerState.duck:
 			duck_state() # Chama a função duck 
 	# Movimentação final	
@@ -73,6 +76,11 @@ func go_to_jump_state():
 	animated_sprite_2d.play("jump") # Animação de pular
 	velocity.y = jump_velocity
 	jump_count += 1 # incrementa a contagem de pulos
+
+func go_to_fall_state():
+	status = PlayerState.fall # Define o status como fall
+	animated_sprite_2d.play("fall") # Animação de queda
+	
 
 func go_to_duck_state():
 	status = PlayerState.duck # Define o status como duck
@@ -115,15 +123,36 @@ func walk_state(delta: float):
 		# Se a tecla estiver pressionada, chama a função de pular uma vez
 		go_to_jump_state() 
 		return
+	# Se não estiver no chão, chama o estado de queda
+	if !is_on_floor():
+		jump_count += 1 # Impede o pulo triplo no ar
+		go_to_fall_state()
+		return
 
 # Estado de pular
 func jump_state(delta: float):
-	move(delta) # Chama a função move
+	# Chama a função move
+	move(delta) 
 	
 	# Pulo duplo
-	if Input.is_action_just_pressed("jump") && jump_count < max_jump_count:
+	if Input.is_action_just_pressed("jump") && can_jump():
 		go_to_jump_state()
+		return
+	
+	# Quando cair no chão ao pular, irá para o estado de queda
+	if velocity.y > 0:
+		go_to_fall_state()
+		return
 		
+# Estado de queda
+func fall_state(delta: float):
+	# Chama a função move
+	move(delta) 
+	
+	# Pulo duplo
+	if Input.is_action_just_pressed("jump") && can_jump():
+		go_to_jump_state()
+		return
 	# Ao voltar ao chão, vai para o estado idle ou walk
 	if is_on_floor(): # Se estiver no chão:
 		jump_count = 0 # Zera a contagem de pulos
@@ -132,7 +161,8 @@ func jump_state(delta: float):
 		else:
 			go_to_walk_state() # Senão, vai para o estado de andar
 		return
-
+	
+		
 # Estado de agachar
 func duck_state():
 	# Chama a função de atualizar direção
@@ -178,4 +208,10 @@ func update_direction():
 		animated_sprite_2d.flip_h = true # direita
 	elif direction > 0:
 		animated_sprite_2d.flip_h = false # esquerda
+
+# Verifica se o jogador pode pular
+func can_jump() -> bool:
+	return jump_count < max_jump_count
+	
+	
 	

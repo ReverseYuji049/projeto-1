@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://c4b055q8nhlpi" path="res://sprites/1 - Penguin/Idle (16 x 16).png" id="2_b0kkn"]
 [ext_resource type="Texture2D" uid="uid://b87bsrwqmxfyy" path="res://sprites/1 - Penguin/Ducking (16 x 16).png" id="2_qly61"]
 [ext_resource type="Texture2D" uid="uid://b10q0lc6fginc" path="res://sprites/1 - Penguin/Waddling (16 x 16).png" id="3_e4p34"]
+[ext_resource type="Texture2D" uid="uid://ceiblf6q2n7ku" path="res://sprites/1 - Penguin/Falling (16 x 16).png" id="3_qsoyl"]
 [ext_resource type="Texture2D" uid="uid://bok8i6tqb1ho3" path="res://sprites/1 - Penguin/Jump (16 x 16).png" id="3_rfe5m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qly61"]
@@ -65,6 +66,14 @@ animations = [{
 }],
 "loop": true,
 "name": &"duck",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_qsoyl")
+}],
+"loop": true,
+"name": &"fall",
 "speed": 5.0
 }, {
 "frames": [{
@@ -133,5 +142,5 @@ z_index = 1
 position = Vector2(0, -2)
 scale = Vector2(1.2033082, 1.2763678)
 sprite_frames = SubResource("SpriteFrames_i623q")
-animation = &"walk"
+animation = &"fall"
 autoplay = "idle"
