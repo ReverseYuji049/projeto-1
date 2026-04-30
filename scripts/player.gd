@@ -16,11 +16,13 @@ enum PlayerState {
 @onready var collison_shape_2d: CollisionShape2D = $CollisionShape2D
 
 # Variáveis do Player para a velocidade, pulo, gravidade
-@export var speed: float = 80.0
-@export var acceleration: float = 1200.0
-@export var friction: float = 1000.0
+@export var max_speed: float = 180.0
+@export var acceleration: float = 100.0
+@export var deceleration: float = 200.0
 @export var jump_velocity: float = -300.0
 @export var gravity: float = 980.0
+@export var ground_deceleration: float = 220.0
+@export var air_deceleration = 40.0
 
 var status: PlayerState # Recebe os valores do Enum
 
@@ -45,7 +47,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y += gravity * delta
 	# Mantém o Player no chão
 	else:
-		velocity.y = 0 
+		move_and_slide()
 		
 	# Se Player estiver em determinado status
 	match status:
@@ -58,7 +60,7 @@ func _physics_process(delta: float) -> void:
 		PlayerState.fall:
 			fall_state(delta) # Chama a função fall
 		PlayerState.duck:
-			duck_state() # Chama a função duck 
+			duck_state(delta) # Chama a função duck 
 	# Movimentação final	
 	move_and_slide()   
 	
@@ -164,7 +166,7 @@ func fall_state(delta: float):
 	
 		
 # Estado de agachar
-func duck_state():
+func duck_state(delta):
 	# Chama a função de atualizar direção
 	update_direction()
 	# Se a tecla não estiver pressionada
@@ -177,26 +179,21 @@ func move(delta: float):
 	
 	# Chama a função de atualizar a direção
 	update_direction()
-	
-	# Verificação da direção
-	if direction < 0:
-		animated_sprite_2d.flip_h = true # direita
-	elif direction > 0:
-		animated_sprite_2d.flip_h = false # esquerda
 		
 	# Se direção:
 	if direction:
 		# Anda para frente
 		velocity.x = move_toward(
 			velocity.x,
-			direction * speed,
+			direction * max_speed,
 			acceleration * delta
 		)
 	else:
+		var decel = ground_deceleration if is_on_floor() else air_deceleration
 		velocity.x = move_toward(
 			velocity.x,
 			0,
-			friction * delta
+			deceleration * delta
 		)
 
 func update_direction():

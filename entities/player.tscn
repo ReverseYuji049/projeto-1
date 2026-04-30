@@ -142,5 +142,5 @@ z_index = 1
 position = Vector2(0, -2)
 scale = Vector2(1.2033082, 1.2763678)
 sprite_frames = SubResource("SpriteFrames_i623q")
-animation = &"fall"
+animation = &"walk"
 autoplay = "idle"
