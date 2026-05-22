@@ -6,7 +6,8 @@ enum PlayerState {
 	walk,
 	jump,
 	fall,
-	duck
+	duck,
+	slide
 }
 
 # Define uma variável atribuída a animação do Player
@@ -15,14 +16,21 @@ enum PlayerState {
 # Define uma variável atribuída ao colisor do Player
 @onready var collison_shape_2d: CollisionShape2D = $CollisionShape2D
 
-# Variáveis do Player para a velocidade, pulo, gravidade
-@export var max_speed: float = 180.0
-@export var acceleration: float = 100.0
-@export var deceleration: float = 200.0
+# Variáveis do Player para a velocidade, pulo, gravidade, desaceleração
+@export var max_speed: float = 140.0
+@export var acceleration: float = 800.0
+@export var deceleration: float = 700.0
+@export var ground_deceleration: float = 900.0
+@export var air_deceleration: float = 150.0
+@export var slide_deceleration: float = 350.0
+#@export var max_speed: float = 180.0
+#@export var acceleration: float = 120.0
+#@export var deceleration: float = 400.0
 @export var jump_velocity: float = -300.0
-@export var gravity: float = 980.0
-@export var ground_deceleration: float = 220.0
-@export var air_deceleration = 40.0
+@export var gravity: float = 1000.0
+#@export var ground_deceleration: float = 220.0
+#@export var air_deceleration = 40.0
+#@export var slide_deceleration = 100.0
 
 var status: PlayerState # Recebe os valores do Enum
 
@@ -46,8 +54,8 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y += gravity * delta
 	# Mantém o Player no chão
-	else:
-		move_and_slide()
+	#else:
+		#move_and_slide()
 		
 	# Se Player estiver em determinado status
 	match status:
@@ -61,6 +69,8 @@ func _physics_process(delta: float) -> void:
 			fall_state(delta) # Chama a função fall
 		PlayerState.duck:
 			duck_state(delta) # Chama a função duck 
+		PlayerState.slide:
+			slide_state(delta) # Chama a função slide
 	# Movimentação final	
 	move_and_slide()   
 	
@@ -87,15 +97,20 @@ func go_to_fall_state():
 func go_to_duck_state():
 	status = PlayerState.duck # Define o status como duck
 	animated_sprite_2d.play("duck") # Animação de agachar
-	collison_shape_2d.shape.size.x = 16.0
-	collison_shape_2d.shape.size.y = 14.0
-	collison_shape_2d.position.y = 1.2
-
+	set_small_collider()
+	
 # Sai do estado de duck
 func exit_from_duck_state():
-	collison_shape_2d.shape.size.x = 14.0
-	collison_shape_2d.shape.size.y = 20.0
-	collison_shape_2d.position.y = -2.0
+	set_large_collider()
+	
+func go_to_slide_state():
+	status = PlayerState.slide
+	animated_sprite_2d.play("slide")
+	set_small_collider()
+	
+
+func exit_from_slide_state():
+	set_large_collider()
 
 # Roda infinitamente
 func idle_state(delta: float):
@@ -125,6 +140,13 @@ func walk_state(delta: float):
 		# Se a tecla estiver pressionada, chama a função de pular uma vez
 		go_to_jump_state() 
 		return
+	
+	# Deslizar
+	if Input.is_action_just_pressed("duck"):
+		# Se estiver andando e apertar para baixo, chama a função deslizar
+		go_to_slide_state()
+		return
+	
 	# Se não estiver no chão, chama o estado de queda
 	if !is_on_floor():
 		jump_count += 1 # Impede o pulo triplo no ar
@@ -166,7 +188,7 @@ func fall_state(delta: float):
 	
 		
 # Estado de agachar
-func duck_state(delta):
+func duck_state(_delta):
 	# Chama a função de atualizar direção
 	update_direction()
 	# Se a tecla não estiver pressionada
@@ -174,6 +196,19 @@ func duck_state(delta):
 		exit_from_duck_state() # Sai do estado de agachar
 		go_to_idle_state() # Volta ao estado de idle
 		return
+
+func slide_state(delta):
+	velocity.x = move_toward(velocity.x, 0, slide_deceleration * delta)
+	
+	if Input.is_action_just_released("duck"):
+		exit_from_slide_state()
+		go_to_walk_state()
+		return
+	if velocity.x == 0:
+		exit_from_slide_state()
+		go_to_duck_state()
+		return
+	
 # Movimentação do Player
 func move(delta: float):
 	
@@ -193,7 +228,7 @@ func move(delta: float):
 		velocity.x = move_toward(
 			velocity.x,
 			0,
-			deceleration * delta
+			decel * delta
 		)
 
 func update_direction():
@@ -209,6 +244,15 @@ func update_direction():
 # Verifica se o jogador pode pular
 func can_jump() -> bool:
 	return jump_count < max_jump_count
+
+func set_small_collider():
+	collison_shape_2d.shape.size.x = 16.0
+	collison_shape_2d.shape.size.y = 14.0
+	collison_shape_2d.position.y = 1.2
 	
+func set_large_collider():
+	collison_shape_2d.shape.size.x = 14.0
+	collison_shape_2d.shape.size.y = 20.0
+	collison_shape_2d.position.y = -2.0
 	
 	
