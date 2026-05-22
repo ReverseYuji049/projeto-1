@@ -22,15 +22,9 @@ enum PlayerState {
 @export var deceleration: float = 700.0
 @export var ground_deceleration: float = 900.0
 @export var air_deceleration: float = 150.0
-@export var slide_deceleration: float = 350.0
-#@export var max_speed: float = 180.0
-#@export var acceleration: float = 120.0
-#@export var deceleration: float = 400.0
+@export var slide_deceleration: float = 120.0
 @export var jump_velocity: float = -300.0
 @export var gravity: float = 1000.0
-#@export var ground_deceleration: float = 220.0
-#@export var air_deceleration = 40.0
-#@export var slide_deceleration = 100.0
 
 var status: PlayerState # Recebe os valores do Enum
 
