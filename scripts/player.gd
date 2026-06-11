@@ -7,7 +7,8 @@ enum PlayerState {
 	jump,
 	fall,
 	duck,
-	slide
+	slide,
+	hurt
 }
 
 # Define uma variável atribuída a animação do Player
@@ -65,6 +66,9 @@ func _physics_process(delta: float) -> void:
 			duck_state(delta) # Chama a função duck 
 		PlayerState.slide:
 			slide_state(delta) # Chama a função slide
+		PlayerState.hurt:
+			hurt_state(delta) # Chama o estado de machucado
+			
 	# Movimentação final	
 	move_and_slide()   
 	
@@ -101,10 +105,14 @@ func go_to_slide_state():
 	status = PlayerState.slide
 	animated_sprite_2d.play("slide")
 	set_small_collider()
-	
 
 func exit_from_slide_state():
 	set_large_collider()
+	
+func go_to_hurt_state():
+	status = PlayerState.hurt
+	animated_sprite_2d.play("hurt")
+	velocity = Vector2.ZERO # Zera a velocidade ao morrer
 
 # Roda infinitamente
 func idle_state(delta: float):
@@ -202,6 +210,9 @@ func slide_state(delta):
 		exit_from_slide_state()
 		go_to_duck_state()
 		return
+		
+func hurt_state(delta):
+	pass
 	
 # Movimentação do Player
 func move(delta: float):
@@ -249,4 +260,17 @@ func set_large_collider():
 	collison_shape_2d.shape.size.y = 20.0
 	collison_shape_2d.position.y = -2.0
 	
-	
+# Lógica de colisão entre HitBoxs
+func _on_hit_box_area_entered(area: Area2D) -> void:
+	# Inimigo morto
+	if velocity.y > 0:
+		# Derrota o inimigo
+		area.get_parent().queue_free() # Apaga o inimigo da cena
+		go_to_jump_state()
+	# Player morto
+	else:
+		go_to_hurt_state()
+		
+		
+		
+		
