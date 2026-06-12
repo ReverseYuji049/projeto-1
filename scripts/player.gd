@@ -1,4 +1,5 @@
-extends CharacterBody2D # Importa o Player
+# Importa o Player
+extends CharacterBody2D 
 
 # Define os estados do Player
 enum PlayerState {
@@ -99,19 +100,20 @@ func go_to_duck_state():
 	
 # Sai do estado de duck
 func exit_from_duck_state():
-	set_large_collider()
+	set_large_collider() # Define o colisor largo
 	
 func go_to_slide_state():
-	status = PlayerState.slide
-	animated_sprite_2d.play("slide")
-	set_small_collider()
+	status = PlayerState.slide # Define o status como slide
+	animated_sprite_2d.play("slide") # Animação de deslizar
+	set_small_collider() # Define o colizor pequeno
 
+# Sai do estado de slide
 func exit_from_slide_state():
 	set_large_collider()
-	
+
 func go_to_hurt_state():
-	status = PlayerState.hurt
-	animated_sprite_2d.play("hurt")
+	status = PlayerState.hurt # Define o status como hurt
+	animated_sprite_2d.play("hurt") # Animação de machucado
 	velocity = Vector2.ZERO # Zera a velocidade ao morrer
 
 # Roda infinitamente
@@ -265,8 +267,9 @@ func _on_hit_box_area_entered(area: Area2D) -> void:
 	# Inimigo morto
 	if velocity.y > 0:
 		# Derrota o inimigo
-		area.get_parent().queue_free() # Apaga o inimigo da cena
+		area.get_parent().take_damage() # Pode causar bugs
 		go_to_jump_state()
+		
 	# Player morto
 	else:
 		go_to_hurt_state()
