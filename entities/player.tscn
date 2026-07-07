@@ -185,14 +185,20 @@ z_index = 1
 position = Vector2(0, -2)
 scale = Vector2(1.2033082, 1.2763678)
 sprite_frames = SubResource("SpriteFrames_i623q")
-animation = &"hurt"
+animation = &"idle"
 autoplay = "idle"
 
 [node name="HitBox" type="Area2D" parent="." unique_id=375115725]
+collision_layer = 2
+collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox" unique_id=1650595001]
 position = Vector2(0, -2)
 shape = SubResource("RectangleShape2D_6nm46")
 debug_color = Color(0.048052013, 0.99999994, 0.21920788, 0.41960785)
 
+[node name="ReloadTimer" type="Timer" parent="." unique_id=985020208]
+one_shot = true
+
 [connection signal="area_entered" from="HitBox" to="." method="_on_hit_box_area_entered"]
+[connection signal="timeout" from="ReloadTimer" to="." method="_on_reload_timer_timeout"]

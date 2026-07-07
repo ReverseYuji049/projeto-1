@@ -18,6 +18,9 @@ enum PlayerState {
 # Define uma variável atribuída ao colisor do Player
 @onready var collison_shape_2d: CollisionShape2D = $CollisionShape2D
 
+#Define uma variável atribuída ao timer do Player
+@onready var reload_timer: Timer = $ReloadTimer
+
 # Variáveis do Player para a velocidade, pulo, gravidade, desaceleração
 @export var max_speed: float = 140.0
 @export var acceleration: float = 800.0
@@ -92,7 +95,6 @@ func go_to_fall_state():
 	status = PlayerState.fall # Define o status como fall
 	animated_sprite_2d.play("fall") # Animação de queda
 	
-
 func go_to_duck_state():
 	status = PlayerState.duck # Define o status como duck
 	animated_sprite_2d.play("duck") # Animação de agachar
@@ -115,6 +117,7 @@ func go_to_hurt_state():
 	status = PlayerState.hurt # Define o status como hurt
 	animated_sprite_2d.play("hurt") # Animação de machucado
 	velocity = Vector2.ZERO # Zera a velocidade ao morrer
+	reload_timer.start() # Inicia o tempo de reload
 
 # Roda infinitamente
 func idle_state(delta: float):
@@ -272,8 +275,9 @@ func _on_hit_box_area_entered(area: Area2D) -> void:
 		
 	# Player morto
 	else:
-		go_to_hurt_state()
+		if status != PlayerState.hurt:
+			go_to_hurt_state()
 		
-		
-		
-		
+# Reset da Cena
+func _on_reload_timer_timeout() -> void:
+	get_tree().reload_current_scene()
