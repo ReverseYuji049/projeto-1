@@ -11,7 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://c82tib41n0l1d" path="res://sprites/1 - Penguin/Belly_Sliding (16 x 16).png" id="6_6nm46"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qly61"]
-size = Vector2(14, 20)
+size = Vector2(12, 15)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_e4p34"]
 atlas = ExtResource("2_b0kkn")
@@ -169,7 +169,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nm46"]
-size = Vector2(14, 20)
+size = Vector2(12, 15)
 
 [node name="Player" type="CharacterBody2D" unique_id=77557339 groups=["Player"]]
 collision_layer = 2
@@ -177,23 +177,23 @@ collision_mask = 9
 script = ExtResource("1_merdl")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=236538537]
-position = Vector2(0, -2)
+position = Vector2(-1, 0.5)
 shape = SubResource("RectangleShape2D_qly61")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1960241400]
 z_index = 1
-position = Vector2(0, -2)
-scale = Vector2(1.2033082, 1.2763678)
+position = Vector2(-0.9999998, 0.10547066)
+scale = Vector2(1, 1.0131838)
 sprite_frames = SubResource("SpriteFrames_i623q")
 animation = &"idle"
 autoplay = "idle"
 
 [node name="HitBox" type="Area2D" parent="." unique_id=375115725]
 collision_layer = 2
-collision_mask = 4
+collision_mask = 20
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox" unique_id=1650595001]
-position = Vector2(0, -2)
+position = Vector2(-1, 0.5)
 shape = SubResource("RectangleShape2D_6nm46")
 debug_color = Color(0.048052013, 0.99999994, 0.21920788, 0.41960785)
 

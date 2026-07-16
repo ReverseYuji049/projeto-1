@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bwtrkfq21csi6"]
 
 [ext_resource type="Texture2D" uid="uid://cjbpdhyblowva" path="res://sprites/3 - Skeleton/Spinning_Bone (16 x 16).png" id="1_bkob1"]
-[ext_resource type="Script" uid="uid://8y6gj0u2gyxh" path="res://entities/spinning_bone.gd" id="1_njpw1"]
+[ext_resource type="Script" uid="uid://8y6gj0u2gyxh" path="res://scripts/spinning_bone.gd" id="1_njpw1"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_njpw1"]
 radius = 6.0
@@ -42,7 +42,9 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="SpinningBone" type="Area2D" unique_id=223130452]
+[node name="SpinningBone" type="Area2D" unique_id=223130452 groups=["Lethal Area"]]
+collision_layer = 16
+collision_mask = 3
 script = ExtResource("1_njpw1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=451007695]
@@ -51,3 +53,12 @@ shape = SubResource("CircleShape2D_njpw1")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1083671016]
 sprite_frames = SubResource("SpriteFrames_cjyle")
 autoplay = "default"
+frame_progress = 0.6280737
+
+[node name="SelfDestruction" type="Timer" parent="." unique_id=2017599497]
+one_shot = true
+autostart = true
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="SelfDestruction" to="." method="_on_self_destruction_timeout"]

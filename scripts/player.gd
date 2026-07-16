@@ -18,6 +18,9 @@ enum PlayerState {
 # Define uma variável atribuída ao colisor do Player
 @onready var collison_shape_2d: CollisionShape2D = $CollisionShape2D
 
+# Define uma variável atribuída ao colisor da HitBox
+@onready var hit_box_collision_shape_2d: CollisionShape2D = $HitBox/CollisionShape2D
+
 #Define uma variável atribuída ao timer do Player
 @onready var reload_timer: Timer = $ReloadTimer
 
@@ -116,7 +119,7 @@ func exit_from_slide_state():
 func go_to_hurt_state():
 	status = PlayerState.hurt # Define o status como hurt
 	animated_sprite_2d.play("hurt") # Animação de machucado
-	velocity = Vector2.ZERO # Zera a velocidade ao morrer
+	velocity.x = 0 # Zera a velocidade ao morrer
 	reload_timer.start() # Inicia o tempo de reload
 
 # Roda infinitamente
@@ -216,7 +219,7 @@ func slide_state(delta):
 		go_to_duck_state()
 		return
 		
-func hurt_state(delta):
+func hurt_state(_delta):
 	pass
 	
 # Movimentação do Player
@@ -256,28 +259,44 @@ func can_jump() -> bool:
 	return jump_count < max_jump_count
 
 func set_small_collider():
-	collison_shape_2d.shape.size.x = 16.0
-	collison_shape_2d.shape.size.y = 14.0
-	collison_shape_2d.position.y = 1.2
+	collison_shape_2d.shape.size.x = 12.0
+	collison_shape_2d.shape.size.y = 10.0
+	collison_shape_2d.position.y = 3.0
+	
+	hit_box_collision_shape_2d.shape.size.y = 10.0
+	hit_box_collision_shape_2d.position.y = 3.0
 	
 func set_large_collider():
-	collison_shape_2d.shape.size.x = 14.0
-	collison_shape_2d.shape.size.y = 20.0
-	collison_shape_2d.position.y = -2.0
+	collison_shape_2d.shape.size.x = 12.0
+	collison_shape_2d.shape.size.y = 15.0
+	collison_shape_2d.position.y = 0.5
+	
+	hit_box_collision_shape_2d.shape.size.y = 15.0
+	hit_box_collision_shape_2d.position.y = 0.5
 	
 # Lógica de colisão entre HitBoxs
 func _on_hit_box_area_entered(area: Area2D) -> void:
+	# Se a área colidida estiver no grupo dos inimigos
+	if area.is_in_group("Enemies"):
+		hit_enemy(area) # Chama a função hit_enemy()
+	elif area.is_in_group("Lethal Area"):
+		hit_lethal_area()
+# Colisão com um inimigo
+func hit_enemy(area: Area2D):
 	# Inimigo morto
 	if velocity.y > 0:
 		# Derrota o inimigo
 		area.get_parent().take_damage() # Pode causar bugs
 		go_to_jump_state()
-		
 	# Player morto
 	else:
 		if status != PlayerState.hurt:
 			go_to_hurt_state()
-		
+
+# Colisão com a lethal area
+func hit_lethal_area():
+	go_to_hurt_state()
+
 # Reset da Cena
 func _on_reload_timer_timeout() -> void:
 	get_tree().reload_current_scene()
